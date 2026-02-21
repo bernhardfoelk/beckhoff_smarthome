@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_Mqtt" Id="{89891646-aa9f-4add-b379-714dc75ee849}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+
+	sClient						: ST_MqttClient;	
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

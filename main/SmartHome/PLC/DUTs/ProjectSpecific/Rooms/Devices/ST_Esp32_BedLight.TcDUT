@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Esp32_BedLight" Id="{e6d3cad7-3eb8-449d-92b0-3a4d953409cf}">
+    <Declaration><![CDATA[TYPE ST_Esp32_BedLight :
+STRUCT
+
+	xOn					: BOOL;
+	stMode				: STRING;
+
+	iRed				: INT;
+	iGreen				: INT;
+	iBlue				: INT;	
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

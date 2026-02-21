@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_HMI_Variable_Mapping" Id="{1b7c9d6a-6f82-4bd7-b9a9-4950d0b680b9}">
+    <Declaration><![CDATA[TYPE ST_HMI_Variable_Mapping :
+STRUCT
+	sPath					: BOOL;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

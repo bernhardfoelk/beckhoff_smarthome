@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_BedroomDevices" Id="{6f5fca5b-fe94-4325-98af-3e2b30c3122d}">
+    <Declaration><![CDATA[TYPE ST_BedroomDevices :
+STRUCT
+
+	sEsp32_BedLight						: ST_Esp32_BedLight;	
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

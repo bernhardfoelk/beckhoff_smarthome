@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_IoT_HMI_General_Widget" Id="{344f7878-8c1b-431f-bb0f-435e788a5374}">
+    <Declaration><![CDATA[TYPE ST_IoT_HMI_General_Widget :
+STRUCT
+	sDisplayName 				: STRING := '';
+	bValue1 					: BOOL := FALSE;
+	{attribute 'iot.Unit' := '%'}
+	{attribute 'iot.MinValue' := '0'}
+	{attribute 'iot.MaxValue' := '100'}
+	nValue2 					: INT;
+	nValue2Request 				: INT;
+	bValue2Up 					: BOOL;
+	bValue2Down 				: BOOL;
+	{attribute 'iot.Unit' := '%'}
+	{attribute 'iot.MinValue' := '0'}
+	{attribute 'iot.MaxValue' := '100'}
+	nValue3 					: INT;
+	nValue3Request 				: INT;
+	bValue3Up 					: BOOL;
+	bValue3Down 				: BOOL;
+	sMode1 						: STRING := 'Automatic';
+	aModes1 					: ARRAY[0..1] OF STRING := ['Manual', 'Automatic'];
+	sMode2 						: STRING := 'Automatic';
+	aModes2 					: ARRAY[0..2] OF STRING := ['Manual', 'Automatic', 'Next Mode'];
+	sMode3 						: STRING := 'Automatic';
+	aModes3 					: ARRAY[0..1] OF STRING := ['Manual', 'Automatic'];
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

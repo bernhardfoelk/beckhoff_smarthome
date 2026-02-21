@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_IoT_HMI_Entrance" Id="{7b93a975-e617-4ed5-931b-dc20393d3b65}">
+    <Declaration><![CDATA[TYPE ST_IoT_HMI_Entrance :
+STRUCT
+	
+	{attribute 'iot.ReadOnly' := 'false'}
+	{attribute 'iot.DisplayName' := 'Light'}
+	{attribute 'iot.WidgetType' := 'General'}
+	{attribute 'iot.GeneralWidgetIcon' := 'Lightbulb'}
+	{attribute 'iot.GeneralWidgetColor' := 'LightSlateGray'}
+	{attribute 'iot.GeneralValue1SwitchVisible' := 'true'}
+	{attribute 'iot.GeneralValue2Visible' := 'false'}
+	{attribute 'iot.GeneralValue2SliderVisible' := 'false'}
+	{attribute 'iot.GeneralValue2SliderValuesVisible' := 'false'}
+	{attribute 'iot.GeneralValue2SliderButtonsVisible' := 'false'}
+	{attribute 'iot.GeneralValue2SliderButtonsInverted' := 'false'}
+	{attribute 'iot.GeneralValue3Visible' := 'false'}
+	{attribute 'iot.GeneralValue3SliderVisible' := 'false'}
+	{attribute 'iot.GeneralValue3SliderValuesVisible' := 'false'}
+	{attribute 'iot.GeneralValue3SliderButtonsVisible' := 'false'}
+	{attribute 'iot.GeneralValue3SliderButtonsInverted' := 'false'}
+	{attribute 'iot.GeneralMode1Visible' := 'false'}
+	{attribute 'iot.GeneralMode1Changeable' := 'false'}
+	{attribute 'iot.GeneralMode2Visible' := 'false'}
+	{attribute 'iot.GeneralMode2Changeable' := 'false'}
+	{attribute 'iot.GeneralMode3Visible' := 'false'}
+	{attribute 'iot.GeneralMode3Changeable' := 'false'}
+	sLight						: ST_IoT_HMI_General_Widget;
+    
+	{attribute 'iot.ReadOnly' := 'false'}
+	{attribute 'iot.DisplayName' := 'Steckdose'}
+	{attribute 'iot.WidgetType' := 'Plug'}
+	{attribute 'iot.PlugModeVisible' := 'true'}
+	{attribute 'iot.PlugModeChangeable' := 'true'}
+	sPlug					 	: ST_IoT_HMI_General_Widget_Plug;		
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

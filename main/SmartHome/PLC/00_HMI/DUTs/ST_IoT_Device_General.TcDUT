@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_IoT_Device_General" Id="{efd5a8b1-fa6e-4081-a6a7-ba4a2a80bbec}">
+    <Declaration><![CDATA[TYPE ST_IoT_Device_General :
+STRUCT
+
+	sDeviceName					: STRING;	
+	sDeviceIcon					: STRING;
+	sMainTopic					: STRING;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

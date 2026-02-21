@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_IoT_HMI_Connection" Id="{38f488f5-8e31-41c7-9120-a7f46b00687f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_IoT_HMI_Connection
+VAR_INPUT
+END_VAR
+VAR_IN_OUT
+	sDeviceSettings					: ST_IoT_Device_General;
+	sHmi							: ST_IoT_HMI_Rooms;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	
+	// Communicator function block with usage of SendData method
+	fbIoT_HMI						: FB_IotCommunicator := ();
+	
+	lxHmiError						: BOOL;
+	lhrHmiErrorCode					: HRESULT;
+	//leConnectionState				: ;
+	lxHmiConnected					: BOOL;
+	
+	lTonSendHmiData_IN				: BOOL;
+	lTonSendHmiData	 				: TON;	
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//**************************************************************************************************************************
+// IoT HMI Communication
+
+{region IoT HMI Communication}
+
+	fbIoT_HMI.sHostName := '127.0.0.1';
+	fbIoT_HMI.nPort := 1883;
+	fbIoT_HMI.sMainTopic := sDeviceSettings.sMainTopic;
+	fbIoT_HMI.sDevicename := sDeviceSettings.sDeviceName;
+	fbIoT_HMI.sDeviceIcon := sDeviceSettings.sDeviceIcon;
+	   
+	lxHmiError := fbIoT_HMI.bError;
+	lhrHmiErrorCode := fbIoT_HMI.hrErrorCode;
+	//leHmiConnectionState := fbIoT_HMI.eConnectionState; 
+	lxHmiConnected := fbIoT_HMI.bConnected;
+	
+	// Start executing IoT HMI			   
+	fbIoT_HMI.Execute(TRUE);
+	
+	lTonSendHmiData_IN := lxHmiConnected;
+		  
+	IF lTonSendHmiData.Q THEN
+		lTonSendHmiData_IN := FALSE;
+					   
+		fbIoT_HMI.SendData(ADR(sHMI),SIZEOF(sHMI));
+	END_IF
+		 
+	lTonSendHmiData(IN := lTonSendHmiData_IN,
+			 		PT := T#500MS);
+		 
+{endregion}
+
+
+//**************************************************************************************************************************
+// Get inputs from HMI
+
+{region Get inputs from HMI}
+
+	GetInputsFromHMI();
+
+{endregion}]]></ST>
+    </Implementation>
+    <Method Name="GetInputsFromHMI" Id="{1e4ba739-9e79-45c4-86a5-a2faa866d09e}">
+      <Declaration><![CDATA[METHOD GetInputsFromHMI : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF fbIoT_HMI.fbCommand.bAvailable THEN
+	
+	// Entrance
+	IF FALSE THEN
+		;
+	// Toilette
+	ELSIF FALSE THEN
+		;	
+	// Living room
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sLivingRoom.sLight.bValue1' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sLivingRoom.sLight.bValue1), SIZEOF(sHMI.sLivingRoom.sLight.bValue1), E_IotCommunicatorDatatype.type_BOOL);
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sLivingRoom.sPlug.bOn' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sLivingRoom.sPlug.bOn), SIZEOF(sHMI.sLivingRoom.sPlug.bOn), E_IotCommunicatorDatatype.type_BOOL);
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sLivingRoom.sPlug.sMode' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sLivingRoom.sPlug.sMode), SIZEOF(sHMI.sLivingRoom.sPlug.sMode), E_IotCommunicatorDatatype.type_STRING);
+	// Kitchen
+	ELSIF FALSE THEN
+		;	
+	// Storage
+	ELSIF FALSE THEN
+		;	
+	// Stairs
+	ELSIF FALSE THEN
+		;	
+	// Office
+	ELSIF FALSE THEN
+		;	
+	// Bathroom
+	ELSIF FALSE THEN
+		;	
+	// Bedroom
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sBedroom.sEsp32_BedLight.bLight' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sBedroom.sEsp32_BedLight.bLight), SIZEOF(sHMI.sBedroom.sEsp32_BedLight.bLight), E_IotCommunicatorDatatype.type_BOOL);
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sBedroom.sEsp32_BedLight.nLight' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sBedroom.sEsp32_BedLight.nLight), SIZEOF(sHMI.sBedroom.sEsp32_BedLight.nLight), E_IotCommunicatorDatatype.type_INT);
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sBedroom.sEsp32_BedLight.nHueValue' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sBedroom.sEsp32_BedLight.nHueValue), SIZEOF(sHMI.sBedroom.sEsp32_BedLight.nHueValue), E_IotCommunicatorDatatype.type_INT);
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sBedroom.sEsp32_BedLight.nSaturation' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sBedroom.sEsp32_BedLight.nSaturation), SIZEOF(sHMI.sBedroom.sEsp32_BedLight.nSaturation), E_IotCommunicatorDatatype.type_INT);
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sBedroom.sEsp32_BedLight.nColorTemperature' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sBedroom.sEsp32_BedLight.nColorTemperature), SIZEOF(sHMI.sBedroom.sEsp32_BedLight.nColorTemperature), E_IotCommunicatorDatatype.type_INT);
+	ELSIF fbIoT_HMI.fbCommand.sVarName = 'sBedroom.sEsp32_BedLight.sMode' THEN
+		fbIoT_HMI.fbCommand.GetValue(ADR(sHMI.sBedroom.sEsp32_BedLight.sMode), SIZEOF(sHMI.sBedroom.sEsp32_BedLight.sMode), E_IotCommunicatorDatatype.type_STRING);
+	ELSE
+		// RETURN;
+	END_IF	
+	fbIoT_HMI.SendData(ADR(sHMI), SIZEOF(sHMI));
+	fbIoT_HMI.fbCommand.Remove();
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_IoT_HMI_Connection">
+      <LineId Id="33" Count="6" />
+      <LineId Id="41" Count="32" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_IoT_HMI_Connection.GetInputsFromHMI">
+      <LineId Id="6" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="179" Count="3" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="120" Count="1" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="128" Count="1" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="193" Count="1" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="191" Count="1" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="189" Count="1" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="187" Count="1" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="185" Count="1" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="198" Count="4" />
+      <LineId Id="208" Count="1" />
+      <LineId Id="203" Count="4" />
+      <LineId Id="122" Count="3" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

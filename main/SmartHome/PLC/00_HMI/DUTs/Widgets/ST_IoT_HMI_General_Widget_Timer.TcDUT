@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_IoT_HMI_General_Widget_Timer" Id="{c00421c6-8632-41c8-88b0-a3ee910aa83b}">
+    <Declaration><![CDATA[TYPE ST_IoT_HMI_General_Widget_Timer :
+STRUCT
+	bLight			: BOOL;
+	{attribute 'iot.Unit':='min'}
+	{attribute 'iot.MinValue':='0'}
+	{attribute 'iot.MaxValue':='120'}
+	nLight			: INT;	
+	sMode			: STRING;
+	aModes			: ARRAY[0..1] OF STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

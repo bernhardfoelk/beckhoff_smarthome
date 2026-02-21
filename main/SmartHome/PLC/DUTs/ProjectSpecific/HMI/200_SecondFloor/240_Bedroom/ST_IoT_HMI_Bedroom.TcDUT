@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_IoT_HMI_Bedroom" Id="{95cd5023-1f64-4b46-a232-3ec82a687c8c}">
+    <Declaration><![CDATA[TYPE ST_IoT_HMI_Bedroom :
+STRUCT
+	
+	{attribute 'iot.ReadOnly' := 'false'}
+	{attribute 'iot.DisplayName' := 'Bett Licht'}
+	{attribute 'iot.WidgetType' := 'RGBW'}
+	{attribute 'iot.LightValueVisible' := 'true'}
+	{attribute 'iot.LightSliderVisible' := 'true'}
+	{attribute 'iot.LightColorPaletteVisible' := 'true'}
+	{attribute 'iot.LightColorTemperatureSliderVisible' := 'false'}
+	{attribute 'iot.LightModeVisible' := 'true'}
+	{attribute 'iot.LightModeChangeable' := 'true'}
+	sEsp32_BedLight			 : ST_IoT_HMI_General_Widget_RGBW;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

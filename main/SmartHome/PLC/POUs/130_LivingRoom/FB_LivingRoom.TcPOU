@@ -1,0 +1,586 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_LivingRoom" Id="{e4136490-e6dd-4709-98f8-276888270e53}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_LivingRoom
+
+VAR_INPUT
+	
+	ixErrorAcknowledge 							: BOOL;                 
+	ixAcknowledgePulse 							: BOOL;      
+	
+END_VAR                             			
+                                    			
+VAR_IN_OUT     
+	
+	//================================================================================
+	// HMI interface
+	sHmi										: ST_IoT_HMI_LivingRoom;
+	
+	//================================================================================
+	// MQTT data
+	sMqttClient									: ST_MqttClient;
+	
+	//================================================================================
+	// MQTT data
+	sStatusDevices								: ST_StatusDevices;
+	
+END_VAR                             			
+                                    			
+VAR_OUTPUT	 
+
+	//================================================================================
+	// Alarms       
+	oxF_TestDeactivated 						: BOOL := TRUE; // Test is deactivated
+	oxF_InterceptionCircuitTriggered 			: BOOL := TRUE; // Interception circuit has been triggered - please acknowledge                                                     
+	oxF_InfeedStroke_HP							: BOOL := TRUE; // Infeed stroke does not reach home position
+	oxF_InfeedStroke_WP							: BOOL := TRUE; // Infeed stroke does not reach working position 
+    oxF_InfeedStroke_Pl							: BOOL := TRUE; // Infeed stroke plausibility		
+	oxF_LiftingCyl_HP							: BOOL := TRUE; // Lifting cylinder does not reach home position
+	oxF_LiftingCyl_WP							: BOOL := TRUE; // Lifting cylinder does not reach working position 
+    oxF_LiftingCyl_Pl							: BOOL := TRUE; // Lifting cylinder plausibility                                                
+	oxF_Wenglor_1_LimaServerNotConnected		: BOOL := TRUE; // Wenglor 1 - no connection to LIMA server
+	oxF_Wenglor_1_ResultServerNotConnected		: BOOL := TRUE; // Wenglor 1 - no connection to result server
+	oxF_Wenglor_1_ErrorRequestProjectLoad		: BOOL := TRUE; // Wenglor 1 - error during LIMA command "Project_Load"
+	oxF_Wenglor_1_ErrorRequestDeviceTrigger		: BOOL := TRUE; // Wenglor 1 - error during LIMA command "Device_Trigger" 
+	oxF_Wenglor_1_ResponseResultServer			: BOOL := TRUE; // Wenglor 1 - no response from result server                                            
+	oxF_Wenglor_2_LimaServerNotConnected		: BOOL := TRUE; // Wenglor 2 - no connection to LIMA server
+	oxF_Wenglor_2_ResultServerNotConnected		: BOOL := TRUE; // Wenglor 2 - no connection to result server
+	oxF_Wenglor_2_ErrorRequestProjectLoad		: BOOL := TRUE; // Wenglor 2 - error during LIMA command "Project_Load"
+	oxF_Wenglor_2_ErrorRequestDeviceTrigger		: BOOL := TRUE; // Wenglor 2 - error during LIMA command "Device_Trigger" 
+	oxF_Wenglor_2_ResponseResultServer			: BOOL := TRUE; // Wenglor 2 - no response from result server
+	oxF_LimaServerManuallyDisconnected			: BOOL := TRUE; // Wenglor - LIMA server manually disconnected
+	oxF_CS_LogError								: BOOL := TRUE; // Control station error at Log command
+
+END_VAR                                 		        
+                                        		
+VAR PERSISTENT    
+                          		
+	lxMessage 									: BOOL;
+	lxOpModeOk									: BOOL;				 
+	                                			
+	lEdge_TippOk 								: R_TRIG;
+	
+	stStatusText								: STRING(255);
+                                    			
+	lxEntryAction 								: BOOL;
+	lxStopped 									: BOOL;
+	liStep 										: INT;
+	liLStep 									: INT;
+	liNStep 									: INT;
+	liLastCycleStep 							: INT;
+	liCounter_i 								: INT;
+	liCounter_j 								: INT;
+	              
+	lxTonStep_IN 								: BOOL;
+	lxTonStepF_IN 								: BOOL;
+	ltTonStep_PT 								: TIME;
+	ltTonStepF_PT 								: TIME;
+	lTonStep 									: TON;
+	lTonStepF 									: TON;
+
+	//================================================================================
+	// General
+
+	//================================================================================
+	// local HMI data
+
+	//================================================================================
+	// MQTT client	
+	lstTopicPub									: STRING(255) := 'shellyplus1pm-e465b8944d64/command/switch:0';
+	lstMessagePub								: STRING(255);
+	lxPublish									: BOOL;
+	lxPublished									: BOOL;
+                               			
+	lstTopicSub									: STRING(255) := 'shellyplus1pm-e465b8944d64/status/switch:0/#';
+	lxSubscribed								: BOOL;
+	lxUnsubscribed								: BOOL;
+	
+	//================================================================================
+	// Get status of shelly device
+	lTonStatusUpdate							: TON;
+	lxTonStatusUpdate_IN						: BOOL;
+	ltTonStatusUpdate_PT						: TIME;
+	lxEnableGetStatus							: BOOL;
+	lstStatusMessage							: STRING(255);
+	
+	lxRefreshDeviceStatus						: BOOL;
+	
+	//================================================================================  
+	// Start Acess & Process required for Shelly
+	lRE_StartAcess			     				: R_TRIG;
+	lFE_StartAcess			     				: F_TRIG;
+	lxProcessingRequired						: BOOL;
+	lxStartAccess								: BOOL;
+
+END_VAR
+
+VAR_TEMP
+	
+END_VAR
+
+VAR CONSTANT 
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[{region information}
+(*
+****************************************************************************************************************************
+Living room
+****************************************************************************************************************************
+
+****************************************************************************************************************************
+version history:
+
+date            name        comment
+10.10.2023      FÖB         creation
+
+****************************************************************************************************************************
+description:
+
+
+****************************************************************************************************************************
+*)
+{endregion} 
+//**************************************************************************************************************************
+			
+
+//**************************************************************************************************************************
+{region mqtt client}
+
+	sMqttClient.fbIotMqttClient(
+			 					ixEnable := sMqttClient.sConfig.xEnable,
+								sHostName := sMqttClient.sConfig.sHostName,
+								nHostPort := sMqttClient.sConfig.nHostPort,
+								sMqttData := sMqttClient.sData,
+								sStatusDevices := sStatusDevices
+								);
+
+{endregion}
+
+//**************************************************************************************************************************				 
+{region reset}
+		  
+	IF NOT(sMqttClient.fbIotMqttClient.bConnected) OR  
+		FALSE THEN
+
+		lxEntryAction := TRUE;
+		
+		liLStep := liStep;
+		liStep := 0;
+	END_IF
+		 
+{endregion}
+
+//**************************************************************************************************************************
+{region error acknowledge}
+
+	IF ixErrorAcknowledge THEN
+		;	
+	END_IF	
+
+{endregion}
+
+//**************************************************************************************************************************
+{region check start access for indexer}
+	
+	lRE_StartAcess(CLK := sHmi.sLight.bValue1);
+	lFE_StartAcess(CLK := sHmi.sLight.bValue1);
+		 
+	IF lRE_StartAcess.Q OR lFE_StartAcess.Q THEN
+
+		//processing required through part tracking? 
+		lxProcessingRequired := NOT(lxRefreshDeviceStatus);
+
+		lxStartAccess := lxProcessingRequired;
+	END_IF
+	 
+{endregion}
+
+//**************************************************************************************************************************
+{region state machine}
+	
+	CASE liStep OF
+			
+			//**************************************************************************************************************************
+			// STEP 0
+		0:
+			lxStopped := TRUE;
+				 
+			lxMessage := TRUE;
+			
+			IF lxOpModeOk AND sMqttClient.fbIotMqttClient.bConnected THEN
+
+				liStep := 2;
+			END_IF
+
+			//**************************************************************************************************************************
+			// STEP 2
+		2:
+			IF lxEntryAction THEN
+				lxEntryAction := FALSE;
+			END_IF
+
+			lxMessage := TRUE;
+			
+			IF lxOpModeOk THEN
+	
+		 		liStep := 10;
+		 		IF lxSubscribed THEN
+					liStep := 4; 
+				END_IF
+			END_IF
+
+			//**************************************************************************************************************************
+			// STEP 4 - unsubscribe topic
+		4:
+			IF lxEntryAction THEN
+				lxEntryAction := FALSE;
+			END_IF
+		
+			lxUnsubscribed := sMqttClient.fbIotMqttClient.Unsubscribe(lstTopicSub);
+
+			IF NOT(lxUnsubscribed) THEN
+				// StatusText:  '0--------1---------2---------3---------4---------5'
+				stStatusText := 'Wait until topic unsubscribed';
+			ELSE
+				lxMessage := TRUE;
+			END_IF
+	
+			IF lxUnsubscribed THEN
+					 
+				lxSubscribed := FALSE;
+							   
+				liStep := 10000;
+			END_IF
+				 
+			//**************************************************************************************************************************
+			// STEP 10 - Check if Log is pending
+		10:
+			IF lxEntryAction THEN
+				lxEntryAction := FALSE;
+			END_IF
+		
+			lxSubscribed := sMqttClient.fbIotMqttClient.Subscribe(lstTopicSub, TcIotMqttQos.AtMostOnceDelivery);
+
+			IF NOT(lxSubscribed) THEN
+				// StatusText:  '0--------1---------2---------3---------4---------5'
+				stStatusText := 'Wait until topic subscribed';
+			ELSE
+				lxMessage := TRUE;
+			END_IF
+	
+			IF lxSubscribed THEN
+
+				liStep := 20;
+			END_IF
+
+
+			//**************************************************************************************************************************      
+			//**************************************************************************************************************************      
+			// STEP 20
+			//**************************************************************************************************************************    
+		20:
+			IF lxEntryAction THEN
+				lxEntryAction := FALSE;
+			END_IF
+			
+			IF NOT (lxStartAccess) THEN
+				// StatusText:  '0--------1---------2---------3---------4---------5'
+				stStatusText := 'Wait for start access';
+			ELSE
+				lxMessage := TRUE;
+			END_IF
+				 
+			lxStopped := NOT(lxStartAccess);
+
+	 		lxTonStatusUpdate_IN := TRUE;
+			ltTonStatusUpdate_PT := T#5S;
+		  
+			IF lxOpModeOk AND lxStartAccess THEN
+				
+				liStep := 100;
+			ELSIF lTonStatusUpdate.Q THEN
+						  
+	 			liStep := 32000;	 
+			END_IF	
+
+	  
+			//**************************************************************************************************************************        
+			//**************************************************************************************************************************          
+			// STEP 100 - Publish "toggle output"
+		100:	
+			IF lxEntryAction THEN
+	 
+				lxEntryAction := FALSE;
+			END_IF	
+											 
+			lstMessagePub := 'toggle';				
+			lxPublished := sMqttClient.fbIotMqttClient.Publish(sTopic:= lstTopicPub,
+								pPayload:= ADR(lstMessagePub), 
+								nPayloadSize:= LEN2(ADR(lstMessagePub)),
+								eQoS:= TcIotMqttQos.AtMostOnceDelivery, 
+								bRetain:= FALSE,
+								bQueue := FALSE );
+			
+			IF NOT (lxPublished) THEN
+				// StatusText:  '0--------1---------2---------3---------4---------5'
+				stStatusText := 'Wait until message published';
+			ELSE
+				lxMessage := TRUE;
+			END_IF
+	
+			IF lxPublished THEN
+
+	 			lxStartAccess := FALSE;
+		  
+				liStep := 110;
+			END_IF	 
+     
+			//**************************************************************************************************************************          
+			// STEP 210 - Publish "toggle output"
+		110:	
+			IF lxEntryAction THEN
+	 
+				lxEntryAction := FALSE;
+			END_IF	
+
+			lxMessage := TRUE;
+	
+		 	lxTonStep_IN := TRUE;
+			ltTonStep_PT := T#1S;
+			  
+			IF lTonStep.Q THEN
+		  
+				liStep := 32000;
+			END_IF	
+
+	 
+			//**************************************************************************************************************************        
+			//**************************************************************************************************************************          
+			// STEP 32000 - Publish "status update"
+		 32000:
+			IF lxEntryAction THEN
+					 
+				sStatusDevices.sLivingRoom.sShellyLight.iOutput := -1;	
+ 
+				lxEntryAction := FALSE;
+			END_IF
+ 
+	  
+			lstMessagePub := 'status_update';				
+			lxPublished := sMqttClient.fbIotMqttClient.Publish(sTopic:= lstTopicPub,
+								pPayload:= ADR(lstMessagePub), 
+								nPayloadSize:= LEN2(ADR(lstMessagePub)),
+								eQoS:= TcIotMqttQos.AtMostOnceDelivery, 
+								bRetain:= FALSE,
+								bQueue := FALSE );
+			
+			IF NOT (lxPublished) THEN
+				// StatusText:  '0--------1---------2---------3---------4---------5'
+				stStatusText := 'Wait until message published';
+			ELSE
+				lxMessage := TRUE;
+			END_IF
+	
+			IF lxPublished THEN
+				liStep := 32010;
+			END_IF
+		    
+			//**************************************************************************************************************************          
+			// STEP 32010 - Publish "status update"
+		32010:	
+			IF lxEntryAction THEN
+						  
+				lxEntryAction := FALSE;
+			END_IF
+			
+			IF (sStatusDevices.sLivingRoom.sShellyLight.iOutput = -1) THEN
+				// StatusText:  '0--------1---------2---------3---------4---------5'
+				stStatusText := 'Wait for data ready';
+			ELSE
+				lxMessage := TRUE;
+			END_IF
+
+			// Write status to HMI
+			IF (sStatusDevices.sLivingRoom.sShellyLight.iOutput <> -1) THEN
+				
+				IF (sStatusDevices.sLivingRoom.sShellyLight.iOutput = 1) THEN		  
+					sHmi.sLight.bValue1 := TRUE;
+				ELSIF (sStatusDevices.sLivingRoom.sShellyLight.iOutput = 0) THEN		  
+					sHmi.sLight.bValue1 := FALSE;
+				END_IF
+					 
+				liStep := 32020;
+			END_IF
+		    
+			//**************************************************************************************************************************          
+			// STEP 32020 - Publish "status update"
+		32020:	
+			IF lxEntryAction THEN
+						  
+				lxEntryAction := FALSE;
+			END_IF
+			
+			lxMessage := TRUE;
+
+	 		lxTonStep_IN := TRUE;
+			ltTonStep_PT := T#50MS;
+		  
+			IF lTonStep.Q THEN
+					 
+				liStep := 20;
+			END_IF					 
+	END_CASE
+		 
+{endregion}
+
+//**************************************************************************************************************************
+{region write status to hmi}
+		 		  				
+	lxRefreshDeviceStatus := (liStep >= 32000) AND (liStep < 32100);
+			  
+{endregion}
+	
+//**************************************************************************************************************************
+{region error-monitoring}
+	
+	ErrorMonitoring();
+
+{endregion}
+
+//**************************************************************************************************************************
+{region stepchain monitoring}
+
+	StepchainMonitoring();
+
+{endregion}	]]></ST>
+    </Implementation>
+    <Folder Name="00_Station" Id="{cd1b4711-83a8-4900-9b60-4340adc02dcc}" />
+    <Folder Name="01_Specific" Id="{d7084317-a5bc-4882-b42a-3b68b99f424f}" />
+    <Method Name="ErrorMonitoring" Id="{0c5347c1-d436-42c2-8426-be4bf8e33909}" FolderPath="00_Station\">
+      <Declaration><![CDATA[METHOD PRIVATE ErrorMonitoring : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//**************************************************************************************************************************
+{region ERROR-MONITORING}
+	
+	
+
+{endregion}]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StepchainMonitoring" Id="{891a5fee-4a22-4a08-a13e-d3272948a9be}" FolderPath="00_Station\">
+      <Declaration><![CDATA[{warning 'Methodenimplementierung hinzufügen'}
+METHOD PRIVATE StepchainMonitoring : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//**************************************************************************************************************************
+{region STEPCHAIN STEP MONITORING}
+	
+	IF liStep <> liLastCycleStep THEN
+		lxEntryAction := TRUE;
+		
+		lxTonStep_IN := FALSE;
+		lxTonStepF_IN := FALSE;
+		lxTonStatusUpdate_IN := FALSE;
+		
+		liLStep := liLastCycleStep;
+	END_IF
+	liLastCycleStep := liStep;
+	
+{endregion}
+
+//**************************************************************************************************************************
+{region timer call}
+	
+	lTonStep(IN := lxTonStep_IN,
+				 PT := ltTonStep_PT);
+	lTonStepF(IN := lxTonStepF_IN,
+				  PT := ltTonStepF_PT);
+	lTonStatusUpdate(IN := lxTonStatusUpdate_IN,
+				  PT := ltTonStatusUpdate_PT);
+	
+{endregion}]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_LivingRoom">
+      <LineId Id="444798" Count="19" />
+      <LineId Id="445475" Count="5" />
+      <LineId Id="445525" Count="0" />
+      <LineId Id="445481" Count="5" />
+      <LineId Id="445488" Count="2" />
+      <LineId Id="444821" Count="10" />
+      <LineId Id="445204" Count="0" />
+      <LineId Id="444835" Count="21" />
+      <LineId Id="444858" Count="54" />
+      <LineId Id="445642" Count="0" />
+      <LineId Id="444913" Count="0" />
+      <LineId Id="445645" Count="0" />
+      <LineId Id="444914" Count="41" />
+      <LineId Id="445209" Count="0" />
+      <LineId Id="444956" Count="0" />
+      <LineId Id="445265" Count="3" />
+      <LineId Id="445210" Count="0" />
+      <LineId Id="445306" Count="0" />
+      <LineId Id="445305" Count="0" />
+      <LineId Id="444959" Count="0" />
+      <LineId Id="446033" Count="49" />
+      <LineId Id="445234" Count="0" />
+      <LineId Id="445255" Count="0" />
+      <LineId Id="445235" Count="2" />
+      <LineId Id="444960" Count="0" />
+      <LineId Id="445238" Count="0" />
+      <LineId Id="445514" Count="1" />
+      <LineId Id="445239" Count="0" />
+      <LineId Id="445765" Count="0" />
+      <LineId Id="445240" Count="0" />
+      <LineId Id="445277" Count="1" />
+      <LineId Id="445501" Count="1" />
+      <LineId Id="445510" Count="0" />
+      <LineId Id="445505" Count="3" />
+      <LineId Id="445270" Count="6" />
+      <LineId Id="445225" Count="4" />
+      <LineId Id="445253" Count="1" />
+      <LineId Id="445230" Count="0" />
+      <LineId Id="445259" Count="0" />
+      <LineId Id="445513" Count="0" />
+      <LineId Id="445512" Count="0" />
+      <LineId Id="445261" Count="0" />
+      <LineId Id="445282" Count="9" />
+      <LineId Id="445295" Count="5" />
+      <LineId Id="445310" Count="0" />
+      <LineId Id="445314" Count="0" />
+      <LineId Id="445313" Count="0" />
+      <LineId Id="445885" Count="9" />
+      <LineId Id="445899" Count="0" />
+      <LineId Id="445912" Count="0" />
+      <LineId Id="445902" Count="0" />
+      <LineId Id="445914" Count="0" />
+      <LineId Id="445913" Count="0" />
+      <LineId Id="445909" Count="2" />
+      <LineId Id="444986" Count="5" />
+      <LineId Id="445030" Count="1" />
+      <LineId Id="446085" Count="0" />
+      <LineId Id="446083" Count="0" />
+      <LineId Id="445032" Count="13" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LivingRoom.ErrorMonitoring">
+      <LineId Id="128" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="207" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LivingRoom.StepchainMonitoring">
+      <LineId Id="112" Count="0" />
+      <LineId Id="115" Count="6" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="122" Count="7" />
+      <LineId Id="132" Count="5" />
+      <LineId Id="142" Count="1" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="4" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_IoT_HMI_Rooms" Id="{e4489d93-de5b-45ad-b701-6b981dd3eb76}">
+    <Declaration><![CDATA[TYPE ST_IoT_HMI_Rooms :
+STRUCT
+	
+	// First floor
+	{attribute 'iot.DisplayName' := 'Flur UG'}
+	{attribute 'iot.NestedStructIcon' := 'Door_Open'}
+	sEntrance					: ST_IoT_HMI_Entrance;	
+	{attribute 'iot.DisplayName' := 'Toilette'}
+	{attribute 'iot.NestedStructIcon' := 'Toilet'}
+	sToilette					: ST_IoT_HMI_Toilette;
+	{attribute 'iot.DisplayName' := 'Wohnzimmer'}
+	{attribute 'iot.NestedStructIcon' := 'Sofa'}
+	sLivingRoom					: ST_IoT_HMI_LivingRoom;
+	{attribute 'iot.DisplayName' := 'Kueche'}
+	{attribute 'iot.NestedStructIcon' := 'Kitchen'}
+	sKitchen					: ST_IoT_HMI_Kitchen;
+	{attribute 'iot.DisplayName' := 'Speiss'}
+	{attribute 'iot.NestedStructIcon' := 'Storage'}
+	sStorage					: ST_IoT_HMI_Storage;
+	
+	// Second floor
+	{attribute 'iot.DisplayName' := 'Flur OG'}
+	{attribute 'iot.NestedStructIcon' := 'Floor'}
+	sStairs						: ST_IoT_HMI_Stairs;
+	{attribute 'iot.DisplayName' := 'Buero'}
+	{attribute 'iot.NestedStructIcon' := 'PC'}
+	sOffice						: ST_IoT_HMI_Office;
+	{attribute 'iot.DisplayName' := 'Badezimmer'}
+	{attribute 'iot.NestedStructIcon' := 'Bath'}
+	sBathroom					: ST_IoT_HMI_Bathroom;
+	{attribute 'iot.DisplayName' := 'Schlafzimmer'}
+	{attribute 'iot.NestedStructIcon' := 'Bed'}
+	sBedroom					: ST_IoT_HMI_Bedroom;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

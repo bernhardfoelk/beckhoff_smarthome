@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_MqttClient" Id="{fe885f9a-ae8e-4658-850f-f2f844bdf35d}">
+    <Declaration><![CDATA[TYPE ST_MqttClient :
+STRUCT
+
+	sConfig				: st_MqttConfig;	
+
+	fbIotMqttClient		: FB_IoT_MqttClient;
+
+	sData				: ST_MqttData;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

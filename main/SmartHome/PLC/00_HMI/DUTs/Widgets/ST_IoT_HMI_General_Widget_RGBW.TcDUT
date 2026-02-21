@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_IoT_HMI_General_Widget_RGBW" Id="{dff27ee4-a2a7-44bc-b10e-899cdc29552c}">
+    <Declaration><![CDATA[TYPE ST_IoT_HMI_General_Widget_RGBW :
+STRUCT
+	sDisplayName 						: STRING := '';
+	bLight 								: BOOL := FALSE;
+	{attribute 'iot.Unit' := '%'}
+	{attribute 'iot.MinValue' := '0'}
+	{attribute 'iot.MaxValue' := '100'}
+	nLight 								: INT := 100;
+	nHueValue 							: INT := 57;
+	nSaturation 						: INT := 100;
+	{attribute 'iot.MinValue' := '2400'} 
+	{attribute 'iot.MaxValue' := '6500'}
+	nColorTemperature 					: INT := 3500;
+	sMode 								: STRING := 'Permanent';
+	aModes 								: ARRAY[0..4] OF STRING := ['Permanent', '15 Minuten', '30 Minuten', '45 Minuten', '1 Stunde'];
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

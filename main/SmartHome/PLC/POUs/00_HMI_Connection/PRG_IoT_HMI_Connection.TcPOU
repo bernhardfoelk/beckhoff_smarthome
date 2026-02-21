@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="PRG_IoT_HMI_Connection" Id="{76bee3cd-4fd6-48cb-9c5b-36fbdc700426}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM PRG_IoT_HMI_Connection
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	fbIoT_HMI_Connection				: FB_IoT_HMI_Connection;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+****************************************************************************************************************************
+
+****************************************************************************************************************************
+
+Erstellt:       FÖB      20.09.2022
+ 
+Geändert:       
+
+****************************************************************************************************************************
+Was man wissen sollte:
+
+****************************************************************************************************************************
+*)
+
+//**************************************************************************************************************************
+// Set device settings
+GVL_HMI.sDevice.sDeviceName := 'Zuhause';
+GVL_HMI.sDevice.sDeviceIcon := 'House';
+GVL_HMI.sDevice.sMainTopic := 'home';
+
+//**************************************************************************************************************************
+// Aufruf Ablaufsteuerung
+//**************************************************************************************************************************
+
+fbIoT_HMI_Connection(
+					sDeviceSettings:= GVL_HMI.sDevice, 
+					sHMI:= GVL_HMI.sRooms
+					);]]></ST>
+    </Implementation>
+    <LineIds Name="PRG_IoT_HMI_Connection">
+      <LineId Id="23" Count="27" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

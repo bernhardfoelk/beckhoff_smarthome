@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_IoT_MqttClient" Id="{d19cea6c-1590-479d-97f4-3a6ff00a1448}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'c++_compatible'}
+FUNCTION_BLOCK FB_IoT_MqttClient EXTENDS FB_IotMqttClient
+VAR_INPUT
+	ixEnable						: BOOL;
+END_VAR
+VAR_IN_OUT
+
+	sMqttData						: ST_MqttData;
+	sStatusDevices					: ST_StatusDevices;	
+
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Execute(ixEnable);]]></ST>
+    </Implementation>
+    <Method Name="OnMqttMessage" Id="{2716c237-99a9-4318-b4ae-2022288ddd31}">
+      <Declaration><![CDATA[{attribute 'c++_compatible'}
+{attribute 'pack_mode' := '4'}
+{attribute 'show'}
+{attribute 'minimal_input_size' := '4'}
+METHOD OnMqttMessage : HRESULT
+VAR_IN_OUT CONSTANT
+topic 						: STRING;
+END_VAR
+VAR_INPUT
+payload 					: PVOID;
+length 						: UDINT;
+qos 						: TcIotMqttQos;
+repeated 					: BOOL;
+END_VAR
+VAR
+	nPayloadRcvLen 			: UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[STRNCPY( ADR(sMqttData.stTopic), ADR(topic), SIZEOF(sMqttData.stTopic) );
+MEMSET(ADR(sMqttData.stMessage), 0, SIZEOF(sMqttData.stMessage));
+FC_MemcpyLimited(ADR(sMqttData.stMessage), SIZEOF(sMqttData.stMessage), payload, length);
+
+IF sMqttData.stTopic = 'shellyplus1pm-e465b8944d64/status/switch:0' THEN
+	IF ParseStatusMessage(sMqttData.stMessage) = 'on' THEN
+		sStatusDevices.sLivingRoom.sShellyLight.iOutput := 1;
+	ELSIF ParseStatusMessage(sMqttData.stMessage) = 'off' THEN
+		sStatusDevices.sLivingRoom.sShellyLight.iOutput := 0;
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ParseStatusMessage" Id="{7632e5bb-ea2b-41ee-9dc3-a0f085772f79}">
+      <Declaration><![CDATA[METHOD ParseStatusMessage : STRING(255)
+VAR_INPUT
+	istrMessage									: STRING(255);
+END_VAR
+VAR_OUTPUT	
+END_VAR
+VAR
+	lstrMessage									: STRING(255);
+	lstrTemp									: STRING(255);
+	lxStringFound								: UDINT;
+END_VAR
+
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ParseStatusMessage := 'empty';
+lstrMessage := istrMessage;
+
+lstrTemp := 'true';
+lxStringFound := FIND2(pSrcString:= ADR(lstrMessage), pFindString:= ADR(lstrTemp));
+IF (lxStringFound > 0) THEN
+	ParseStatusMessage := 'on';
+	RETURN;
+END_IF
+
+lstrTemp := 'false';
+lxStringFound := FIND2(pSrcString:= ADR(lstrMessage), pFindString:= ADR(lstrTemp));
+IF (lxStringFound > 0) THEN
+	ParseStatusMessage := 'off';
+	RETURN;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_IoT_MqttClient">
+      <LineId Id="526" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_IoT_MqttClient.OnMqttMessage">
+      <LineId Id="15" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="33" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_IoT_MqttClient.ParseStatusMessage">
+      <LineId Id="621" Count="0" />
+      <LineId Id="611" Count="0" />
+      <LineId Id="616" Count="0" />
+      <LineId Id="615" Count="0" />
+      <LineId Id="603" Count="0" />
+      <LineId Id="617" Count="0" />
+      <LineId Id="620" Count="0" />
+      <LineId Id="618" Count="0" />
+      <LineId Id="622" Count="6" />
+      <LineId Id="255" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

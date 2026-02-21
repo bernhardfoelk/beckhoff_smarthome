@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FC_MemcpyLimited" Id="{e30c5c0b-ae61-4333-8eaa-a16b9553d76c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION FC_MemcpyLimited : BOOL
+VAR_INPUT
+	DestinationAdress			: PVOID;
+	ediSizeOfDestAdress			: UDINT;
+	
+	SourceAdress				: PVOID;
+	ediBytesToCopy				: UDINT;
+END_VAR
+VAR
+	tdiBytesToCopy				: UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[tdiBytesToCopy := LIMIT(0, ediBytesToCopy, ediSizeOfDestAdress);
+
+MEMCPY(DestinationAdress, SourceAdress, tdiBytesToCopy);]]></ST>
+    </Implementation>
+    <LineIds Name="FC_MemcpyLimited">
+      <LineId Id="7" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

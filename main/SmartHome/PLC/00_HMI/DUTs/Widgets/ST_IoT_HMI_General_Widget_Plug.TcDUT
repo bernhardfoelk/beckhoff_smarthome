@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_IoT_HMI_General_Widget_Plug" Id="{f7cc6c13-d3f7-4cc1-86b7-2b50ae8ceb01}">
+    <Declaration><![CDATA[TYPE ST_IoT_HMI_General_Widget_Plug :
+STRUCT
+	
+	sDisplayName 					: STRING := 'Plug';
+	bOn 							: BOOL;
+	sMode 							: STRING := 'Automatic';
+	aModes 							: ARRAY[0..1] OF STRING := ['Manual', 'Automatic'];
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

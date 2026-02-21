@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="PRG_LivingRoom" Id="{bd6078c0-a02d-48fd-bce0-efedf8a47448}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM PRG_LivingRoom
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	fbLivingRoom					: FB_LivingRoom;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*
+****************************************************************************************************************************
+
+****************************************************************************************************************************
+
+Erstellt:       FÖB      20.09.2022
+ 
+Geändert:       
+
+****************************************************************************************************************************
+Was man wissen sollte:
+
+****************************************************************************************************************************
+*)
+
+//**************************************************************************************************************************
+// Aufruf Ablaufsteuerung
+//**************************************************************************************************************************
+
+fbLivingRoom(
+	ixErrorAcknowledge:= , 
+	ixAcknowledgePulse:= , 
+	sHmi:= GVL_HMI.sRooms.sLivingRoom, 
+	sMqttClient:= GVL_Mqtt.sClient, 
+	sStatusDevices:= GVL_Devices.sStatus);]]></ST>
+    </Implementation>
+    <LineIds Name="PRG_LivingRoom">
+      <LineId Id="23" Count="12" />
+      <LineId Id="42" Count="4" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="148" Count="2" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="60" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
